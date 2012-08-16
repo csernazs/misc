@@ -4,7 +4,7 @@ import itertools
 
 results = []
 
-for op1, op2 in itertools.combinations_with_replacement(xrange(999, 0, -1), 2):
+for op1, op2 in itertools.combinations_with_replacement(xrange(999, 100, -1), 2):
     res = str(op1 * op2)
     
     if len(res) % 2 == 0:
