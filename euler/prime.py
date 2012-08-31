@@ -1,26 +1,42 @@
 
 import time
 
+from array import array
 
 def get_primes(n):
-    numbers = set(xrange(2, n+1))
+    t1=time.time()
+#    numbers = array("B", [0]*(n+1));
+    numbers = [0]*(n+1);
+    print time.time()-t1; t1=time.time()
+    
+    #xrange(2, n+1))
 
     n_s = n/2
     for i in xrange(2, n_s):
-        if i not in numbers:
+        if numbers[i] == 1:
 #            print "skipping", i
             continue
         t = i*2
         while t<=n:
-            numbers.discard(t)
-            
+            numbers[t] = 1;
             t=t+i
-        
-    return numbers
+
+    print time.time()-t1; t1=time.time()
+
+    retval = []
+    for idx, x in enumerate(numbers):
+        if idx<2:
+            continue
+        if x == 0:
+            retval.append(idx)
+
+    print time.time()-t1; t1=time.time()
+                    
+    return retval
     
 
 
-#get_primes(1000000)
+print get_primes(1000000)[:100]
 
 
 #print "time, number"
