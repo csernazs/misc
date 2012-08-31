@@ -15,19 +15,17 @@ def get_divisors(n_max):
 
 
 def solve(n_max):
-    dd = get_divisors(n_max)
+    dd = dict([(k, sum(v)) for k, v in get_divisors(n_max).iteritems()])
 
     retval = set()    
-    for n, divs in dd.iteritems():
+    for n, s in dd.iteritems():
 #        if n == 220:
 #            pdb.set_trace()
-        s = sum(divs)
-        
+
 #        print n, divs, s
-        if s>1 and s<n_max+1 and s != n:
-            if sum(dd[s]) == n:
-                print n, s, divs
-                retval.add(n)
+        if s>1 and s<n_max+1 and s != n and dd[s] == n:
+            print n, s
+            retval.add(n)
     
     return retval
     
