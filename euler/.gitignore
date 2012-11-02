@@ -1,0 +1,8 @@
+*~
+*.so
+*.o
+*.pyc
+*.pyo
+lib*
+p012
+prime
