@@ -50,14 +50,16 @@ int* get_primes(int n) {
     
 }
 
+#ifndef SHARED
 int main(void) {
     int* primes;
     int p;
     primes = get_primes(1000000);
     while (p = *primes) {
-//        printf("%d\n", p);
+        printf("%d\n", p);
         primes++;
     }
     return 0;
 }
+#endif
 
