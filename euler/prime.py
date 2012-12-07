@@ -7,7 +7,6 @@ def get_primes(n):
     t1=time.time()
 #    numbers = array("B", [0]*(n+1));
     numbers = [0]*(n+1);
-    print time.time()-t1; t1=time.time()
     
     #xrange(2, n+1))
 
@@ -21,7 +20,6 @@ def get_primes(n):
             numbers[t] = 1;
             t=t+i
 
-    print time.time()-t1; t1=time.time()
 
     retval = []
     for idx, x in enumerate(numbers):
@@ -30,13 +28,11 @@ def get_primes(n):
         if x == 0:
             retval.append(idx)
 
-    print time.time()-t1; t1=time.time()
-                    
     return retval
     
 
-
-print get_primes(1000000)[:100]
+if __name__ == "__main__":
+    print get_primes(1000000)[:100]
 
 
 #print "time, number"
