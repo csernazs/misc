@@ -45,9 +45,6 @@ while True:
         break
         
     if calc_sum(mult) == 200:
-        if mult[0] >190:
-            print mult
         length += 1
-#        print mult
-    
+
 print length
