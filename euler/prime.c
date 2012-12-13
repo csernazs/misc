@@ -1,15 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-
-int* get_primes(int n) {
+#include <math.h>
+       
+long* get_primes(long n) {
     char* numbers;
-    int i;
-    int n_max;
-    int t;
-    int* ip;
-    int* retval;
-    int length = 0;
+    long i;
+    long n_max;
+    long t;
+    long* ip;
+    long* retval;
+    long length = 0;
     
 
         
@@ -37,8 +37,10 @@ int* get_primes(int n) {
         }
     }
 
-    retval = calloc(length+1, sizeof(int));
-    ip = retval;
+    retval = calloc(length+2, sizeof(long));
+    *retval = length;
+    
+    ip = retval+1;
     for (i=2; i<n; i++) {
         if (numbers[i] == 0) {
             *ip = i;
@@ -50,13 +52,30 @@ int* get_primes(int n) {
     
 }
 
+int is_prime(long n) {
+    int div;
+    
+    long limit;;
+    limit = (long) sqrt((double) n);
+    
+    for (div=2; div<limit; div++) {
+        if (n%div == 0) {
+            return 0;
+        }
+    
+    }
+    return 1;
+
+}
+
 #ifndef SHARED
 int main(void) {
-    int* primes;
-    int p;
+    long* primes;
+    long p;
     primes = get_primes(1000000);
+    primes++; // 1st item is the length
     while (p = *primes) {
-        printf("%d\n", p);
+        printf("%ld\n", p);
         primes++;
     }
     return 0;

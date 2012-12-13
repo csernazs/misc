@@ -5,23 +5,18 @@ libprime = ctypes.CDLL("./libprime.so")
 
 get_primes_c = libprime.get_primes
 
-get_primes_c.restype = ctypes.POINTER(ctypes.c_int)
+is_prime_c = libprime.is_prime
+
+get_primes_c.restype = ctypes.POINTER(ctypes.c_long)
 
 def get_primes(n_max, rettype=list):
+    data = get_primes_c(n_max)
+    length = data[0]
     if rettype == list:
-        retval = []
-        for i in get_primes_c(n_max):
-            if i == 0:
-                break
-            retval.append(i)
+        return data[1:length+1]        
     elif rettype == set:
-        retval = set()
-        for i in get_primes_c(n_max):
-            if i == 0:
-                break
-            retval.add(i)
-    
-    return retval
-    
-    
+        return set(data[1:length+1])
+
+def is_prime(n):
+    return is_prime_c(n)
 
