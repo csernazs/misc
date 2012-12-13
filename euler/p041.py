@@ -25,9 +25,9 @@ def solve(length):
     
     retval = None
     for digits in permutations(map(str, range(1,length+1)), length):
-        if digits[-1] in odd and len(set(digits)) == length:
+        if digits[-1] in odd:
             num = int("".join(digits))
-            if num>retval and c_prime.is_prime(num):
+            if c_prime.is_prime(num):
                 retval = num
                 
     return retval
