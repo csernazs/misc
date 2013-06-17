@@ -17,6 +17,11 @@ def get_primes(n_max, rettype=list):
     elif rettype == set:
         return set(data[1:length+1])
 
+cache = {}
 def is_prime(n):
-    return is_prime_c(n)
-
+    if n in cache:
+        return cache[n]
+    else:
+        retval = is_prime_c(n)
+        cache[n] = retval
+        return retval
