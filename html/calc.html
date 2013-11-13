@@ -1,0 +1,88 @@
+
+<html>
+<head>
+<script src="https://code.jquery.com/jquery.js"></script>
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.css">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap-theme.css">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.js"></script>
+<script src="http://www.brython.info/src/brython.js"></script>
+</head>
+<body onload="brython()">
+<script type="text/python">
+
+class Calculator(object):
+    def __init__(self):
+        self.operator = None
+        self.op_added = False
+        self.op1 = None
+
+    def add_text(self, ev):
+        if ev.target.id.startswith("button"):
+            text = ev.target.id[6:]
+            if text == "dot":
+                text = "."
+            if self.op_added:
+                doc["display"].value = ""
+                self.op_added = False
+            doc["display"].value += text
+
+    def add_operator(self, ev):
+        if ev.target.id.startswith("button"):
+            self.operator = ev.target.id[6:]
+            self.op_added = True
+            if self.op1 is None:
+                self.op1 = float(doc["display"].value)
+            else:
+                op2 = float(doc["display"].value)
+                if self.operator == "add":
+                    self.op1 = self.op1 + op2
+                    doc["display"].value = str(self.op1)
+                self.operator = None
+                    
+            
+
+    def clear_disp(self):
+        doc["display"].value = ""
+        self.op1 = self.operator = None
+        log("cleared")
+
+
+calc = Calculator()
+add_text = calc.add_text
+clear_disp = calc.clear_disp
+add_operator = calc.add_operator    
+</script>
+<div class="container">
+    <div class="page-header">
+        <h1>Hello world!</h1>
+        <p class="lead">This is a simple calculator implemented in... Who knows?</p>
+    </div>
+    <input type="text" class="form-control" id="display" placeholder="Enter a number"><br>
+    <button type="button" id="button7" class="btn btn-default" onclick="add_text(event)">7</button>
+    <button type="button" id="button8" class="btn btn-default" onclick="add_text(event)">8</button>
+    <button type="button" id="button9" class="btn btn-default" onclick="add_text(event)">9</button><br>
+
+    <button type="button" id="button4" class="btn btn-default" onclick="add_text(event)">4</button>
+    <button type="button" id="button5" class="btn btn-default" onclick="add_text(event)">5</button>
+    <button type="button" id="button6" class="btn btn-default" onclick="add_text(event)">6</button><br>
+
+    <button type="button" id="button1" class="btn btn-default" onclick="add_text(event)">1</button>
+    <button type="button" id="button2" class="btn btn-default" onclick="add_text(event)">2</button>
+    <button type="button" id="button3" class="btn btn-default" onclick="add_text(event)">3</button><br>
+
+    <button type="button" id="button0" class="btn btn-default" onclick="add_text(event)">0</button>
+    <button type="button" id="buttondot" class="btn btn-default"onclick="add_text(event)">.</button>
+    <button type="button" id="buttontest" class="btn btn-default" onclick="clear_disp()">C</button><br>
+        
+    <button type="button" id="buttonadd" class="btn btn-default" onclick="add_operator(event)">+</button>
+    
+
+</div>
+</body>
+</html>
