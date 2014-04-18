@@ -57,10 +57,14 @@ def play_dwar(naomi, ken):
         print "naomi", naomi
         print "ken  ", ken
         
-        if naomi[-1] > ken[-1]:
+        nidx = find_gt(naomi, ken[0])
+        if nidx: # lie that we have the largest
+            n_told = ken[-1]+1
+            n_mass = naomi.pop(nidx)
+        elif naomi[-1] > ken[-1]: # no lie
             n_mass = naomi.pop()
             n_told = n_mass
-        else:
+        else:  # lie and lose
             n_mass = naomi.pop(0)
             n_told = ken[-1]-epsilon
 
