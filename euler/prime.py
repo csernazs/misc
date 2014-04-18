@@ -1,9 +1,20 @@
 
 import time
+import tempfile
+import os
+pjoin = os.path.join
+import cPickle
 
 from array import array
 
+
+path_template = pjoin(tempfile.gettempdir(), "primes_%d.txt")
+
 def get_primes(n):
+    path = path_template % n
+    if os.path.isfile(path):
+        return map(int, open(path).read().split(" "))
+
     t1=time.time()
 #    numbers = array("B", [0]*(n+1));
     numbers = [0]*(n+1);
@@ -28,6 +39,7 @@ def get_primes(n):
         if x == 0:
             retval.append(idx)
 
+    open(path, "w").write(" ".join(map(str, retval)))
     return retval
     
 
