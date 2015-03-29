@@ -2,3 +2,5 @@
 *.bak
 *.old
 *.pyc
+*.in
+*.out
