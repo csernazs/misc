@@ -14,15 +14,15 @@ def read_lines(f, no_lines):
         retval.append(f.readline().rstrip())
     return retval
 
+
 def solve():
     pass
-
 
 if __name__ == "__main__":
     infile = open(sys.argv[1])
     no_cases = int(infile.readline())
     
-    solve()
     
     for cidx in xrange(no_cases):
+        sol = solve()
         print "Case #%d: %d" % (cidx+1, sol)

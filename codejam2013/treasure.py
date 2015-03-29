@@ -92,8 +92,18 @@ def solve(keys, chests, no_chests, used=None, cnt=0):
     
     print cnt, "todo", [c for c in chests if c not in used]
 
+    closed_chests = [x for x in chests if x not in used]
+
+    locks_required = [x.lock for x in closed_chests]
+    keys_available = keys
+    [keys_available.extend(chest.keys) for chest in closed_chests]
+    
+    
+    if sorted(keys_available) != sorted(locks_required):
+        return False
+        
     used_set = set(used)    
-    for cidx, chest in enumerate([x for x in chests if x not in used_set]):
+    for cidx, chest in enumerate(closed_chests):
         print cnt, "cidx", cidx
         if chest.lock in keys:
             print cnt,"opening", chest, "with key", chest.lock
@@ -135,8 +145,6 @@ if __name__ == "__main__":
 #        print chests
 #        print "call", keys, chests
         used = []
-        if cidx==7:
-            continue
         
         cache = {}
         status = solve(keys, chests, no_chests, used)

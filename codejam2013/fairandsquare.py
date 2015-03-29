@@ -96,8 +96,14 @@ if __name__ == "__main__":
     infile = open(sys.argv[1])
     no_cases = int(infile.readline())
     
-    for cidx in xrange(no_cases):
-        low, high = read_ints(infile)
-        sol = solve(low, high)
+    for i in palindrome_gen(1, 10**50):
+        print i
+#        if is_palindrome(i**2):
+#            print i
+    
+    
+#    for cidx in xrange(no_cases):
+#        low, high = read_ints(infile)
+#        sol = solve(low, high)
 
-        print "Case #%d: %d" % (cidx+1, sol)
+#        print "Case #%d: %d" % (cidx+1, sol)
