@@ -3,12 +3,10 @@ from declarative import *
 
 
 class TestVariable(unittest.TestCase):
-
     def test_variable(self):
         ctx = Context()
         program = CompositeCommand([
-            VariableSetter(Variables.VARIABLE_A, Value("hello world")),
-            VariableSetter(
+            VariableSetter(Variables.VARIABLE_A, Value("hello world")), VariableSetter(
                 Variables.VARIABLE_B, VariableRetriever(Variables.VARIABLE_A))
         ])
 
@@ -31,10 +29,7 @@ class TestVariable(unittest.TestCase):
 
     def test_addition(self):
         ctx = Context()
-        program = CompositeCommand([
-            VariableSetter(
-                Variables.VARIABLE_A, AdditionCommand(Value(1), Value(2)))
-        ])
+        program = CompositeCommand([VariableSetter(Variables.VARIABLE_A, AdditionCommand(Value(1), Value(2)))])
 
         program.run(ctx)
 
@@ -44,19 +39,14 @@ class TestVariable(unittest.TestCase):
         ctx = Context()
 
         program = CompositeCommand([
-            VariableSetter(Variables.VARIABLE_A, ListCreator()),
-            VariableSetter(Variables.VARIABLE_C, Value("")),
+            VariableSetter(Variables.VARIABLE_A, ListCreator()), VariableSetter(Variables.VARIABLE_C, Value("")),
             ListAppender(VariableRetriever(Variables.VARIABLE_A), Value("a")),
             ListAppender(VariableRetriever(Variables.VARIABLE_A), Value("b")),
-            ListAppender(VariableRetriever(Variables.VARIABLE_A), Value("c")),
-            Iterator(
+            ListAppender(VariableRetriever(Variables.VARIABLE_A), Value("c")), Iterator(
                 VariableRetriever(Variables.VARIABLE_A), VariableFactory(
-                    Variables.VARIABLE_B),
-                VariableSetter(Variables.VARIABLE_C,
-                               AdditionCommand(
-                                   VariableRetriever(
-                                       Variables.VARIABLE_C),
-                                   VariableRetriever(Variables.VARIABLE_B))))
+                    Variables.VARIABLE_B), VariableSetter(Variables.VARIABLE_C, AdditionCommand(
+                        VariableRetriever(
+                            Variables.VARIABLE_C), VariableRetriever(Variables.VARIABLE_B))))
         ])
 
         program.run(ctx)
@@ -66,14 +56,12 @@ class TestVariable(unittest.TestCase):
         ctx = Context()
 
         program = CompositeCommand([
-            VariableSetter(Variables.VARIABLE_A, Value(1)),
-            VariableSetter(Variables.VARIABLE_B, Value(2)),
-            Controller(
+            VariableSetter(Variables.VARIABLE_A, Value(1)), VariableSetter(Variables.VARIABLE_B, Value(2)), Controller(
                 EqualityChecker(
                     VariableRetriever(
                         Variables.VARIABLE_A), VariableRetriever(
-                            Variables.VARIABLE_B)),
-                VariableSetter(Variables.VARIABLE_C, Value(1)), VariableSetter(Variables.VARIABLE_D, Value(1)))
+                            Variables.VARIABLE_B)), VariableSetter(Variables.VARIABLE_C, Value(1)),
+                VariableSetter(Variables.VARIABLE_D, Value(1)))
         ])
 
         program.run(ctx)

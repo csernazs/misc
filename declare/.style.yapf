@@ -1,0 +1,5 @@
+[style]
+based_on_style = google
+COLUMN_LIMIT=120
+BLANK_LINE_BEFORE_NESTED_CLASS_OR_DEF=False
+
