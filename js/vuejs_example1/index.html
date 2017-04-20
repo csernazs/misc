@@ -1,0 +1,64 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css@0.2.13/docs/dist/spectre.css" />
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css@0.2.13/docs/dist/spectre-icons.css" />
+    <script src="https://unpkg.com/vue"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="columns">
+            <div class="column col-1"></div>
+
+            <div class="column col-6">
+                <h1>TODO</h1>
+            </div>
+        </div>
+    </div>
+    <div class="container" id="app">
+        <div class="columns">
+            <div class="column col-2"></div>
+            <div class="column col-4">
+                <p>
+                    Number of items: {{ todos.length }}
+                </p>
+                <div class="input-group">
+                    <input class="form-input" type="text" id="todo_name" v-model="todo_name" placeholder="Name" v-on:keyup.enter="add_todo" />
+                    <button class="btn btn-primary input-group-btn" v-on:click="add_todo">Add</button>
+                </div>
+                <ul>
+                    <li v-for="todo in todos">{{ todo.text }} <button class="btn btn-link" v-on:click="remove_todo(todo)"><i class="icon icon-cross"></i></button>
+                    </li>
+                </ul>
+            </div>
+            <div class="column col-2"></div>
+        </div>
+
+    </div>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                todo_name: "",
+                todos: [
+                    { text: 'Learn JavaScript' },
+                    { text: 'Learn Vue' },
+                    { text: 'Build something awesome' }
+                ]
+            },
+            methods: {
+                add_todo: function () {
+                    this.todos.push({ text: this.todo_name });
+                    this.todo_name = "";
+                },
+
+                remove_todo: function (todo) {
+                    this.todos.splice(this.todos.indexOf(todo), 1);
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>
