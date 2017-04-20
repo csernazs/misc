@@ -24,11 +24,11 @@
                     Number of items: {{ todos.length }}
                 </p>
                 <div class="input-group">
-                    <input class="form-input" type="text" id="todo_name" v-model="todo_name" placeholder="Name" v-on:keyup.enter="add_todo" />
-                    <button class="btn btn-primary input-group-btn" v-on:click="add_todo">Add</button>
+                    <input class="form-input" type="text" id="todo_name" v-model="todo_name" placeholder="Name" v-on:keyup.enter="add_todo" autofocus />
+                    <button class="btn btn-primary input-group-btn" v-on:click="add_todo" v-bind:class="{disabled: todo_name.length == 0}"><i class="icon icon-plus"></i></button>
                 </div>
                 <ul>
-                    <li v-for="todo in todos">{{ todo.text }} <button class="btn btn-link" v-on:click="remove_todo(todo)"><i class="icon icon-cross"></i></button>
+                    <li v-for="todo in todos">{{ todo.text }} <i v-on:click="remove_todo(todo)" class="icon icon-cross"></i>
                     </li>
                 </ul>
             </div>
@@ -49,8 +49,10 @@
             },
             methods: {
                 add_todo: function () {
-                    this.todos.push({ text: this.todo_name });
-                    this.todo_name = "";
+                    if (this.todo_name.length > 0) {
+                        this.todos.push({ text: this.todo_name });
+                        this.todo_name = "";
+                    }
                 },
 
                 remove_todo: function (todo) {
