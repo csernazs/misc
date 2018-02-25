@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Socket.IO grid</title>
+    <link rel="stylesheet" href="/assets/spectre/spectre.min.css">
+    <link rel="stylesheet" href="/assets/spectre/spectre-exp.min.css">
+    <link rel="stylesheet" href="/assets/spectre/spectre-icons.min.css">
+    <style>
+        td {
+            border: 1px solid black;
+            border-radius: 5px;
+            width: 20px;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        td.active {
+            background-color: lightseagreen;
+        }
+
+        tr {
+            height: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" id="app">
+        <div class="columns">
+            <div class="column col-2"></div>
+            <div class="column col-8">
+                <h1>{{ message }}</h1>
+                <table>
+                    <tr v-for="(row, rowidx) in grid">
+                        <td v-for="(cell, colidx) in row" v-bind:class="{ active: cell }" v-on:click="flip_click(rowidx, colidx)" v-model="grid[rowidx][colidx]">
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="column col-2"></div>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.4.0"></script>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                message: 'Hello Vue!',
+                grid: []
+            },
+            
+            created: function() {
+                this.socket = io();
+
+                this.socket.on("flip", function(msg) {
+                    app.flip(msg[0], msg[1]);
+                });
+
+                this.$http.get("/state").then(response => {
+                    this.grid = response.body;
+                });
+
+            },
+
+            methods: {
+                flip_click: function(rowidx, colidx) {
+                    this.flip(rowidx, colidx);
+                    this.socket.emit("flip", [rowidx, colidx]);
+                },
+
+                flip: function(rowidx, colidx) {
+                    if (!this.grid) {
+                        return;
+                    }
+                    var cell = this.grid[rowidx][colidx];
+                    if (cell == 0) {
+                        this.grid[rowidx].splice(colidx, 1, 1);
+                    } else {
+                        this.grid[rowidx].splice(colidx, 1, 0);
+                    }
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>

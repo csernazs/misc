@@ -1,0 +1,16 @@
+{
+  "name": "multiuser-grid",
+  "version": "0.0.1",
+  "description": "multi user grid",
+  "dependencies": {
+    "express": "^4.16.2",
+    "socket.io": "^2.0.4",
+    "spectre-css": "^1.0.0",
+    "spectre.css": "^0.5.1"
+  },
+  "license": "MIT",
+  "author": {
+    "email": "cserna.zsolt@gmail.com",
+    "name": "Zsolt Cserna"
+  }
+}
