@@ -1,3 +1,5 @@
+
+from typing import Optional, Any
 """
 Some
 module
@@ -9,6 +11,9 @@ docstring
 
 __MODULE_PRIVATE = 999
 
+
+def annotated(i: int, s: Optional[str]) -> Any:
+    pass
 
 def __foo():  # some comment here
     __inside_private = 123
