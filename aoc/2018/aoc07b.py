@@ -14,11 +14,14 @@ class Workers:
     def assign_work(self, time, label):
         next_worker_idx = self.get_next_idle()
         if next_worker_idx is None:
-            return False
+            self.advance_time_to_assign()
+            next_worker_idx = self.get_next_idle()
+
+            assert next_worker_idx != None
 
         self.workers[next_worker_idx] = time
         self.labels[next_worker_idx] = label
-        print("worker started working on", label, "for", time)
+        print("worker with", label, "for", time, "seconds")
         return True
 
     def can_assign(self):
@@ -31,6 +34,7 @@ class Workers:
         return None
 
     def advance_time(self, time):
+        print("advance_time", time)
         if time == 0:
             return
 
@@ -46,8 +50,8 @@ class Workers:
                 time_spent.append(time)
 
             workers.append(remaining)
-            if remaining == 0:
-                labels.append("")
+            if remaining == 0 and label is not None:
+                labels.append(None)
                 print(label, "completed")
                 self.completed.append(label)
             else:
@@ -63,9 +67,14 @@ class Workers:
     def advance_time_to_complete(self):
         self.advance_time(max(self.workers))
 
+    def advance_time_minimum(self):
+        for worker in sorted(self.workers):
+            if worker > 0:
+                self.advance_time(worker)
+                break
 
 def get_time_required(x):
-    return ord(x) - 64
+    return ord(x) - 64 + 60
 
 
 def main():
@@ -77,7 +86,7 @@ Step B must be finished before step E can begin.
 Step D must be finished before step E can begin.
 Step F must be finished before step E can begin."""
 
-    # input_text = open("aoc07.txt").read()
+    input_text = open("aoc07.txt").read()
     requirements = defaultdict(list)
 
     for line in input_text.splitlines():
@@ -103,23 +112,25 @@ Step F must be finished before step E can begin."""
             else:  # not terminated by break
                 todo.append(step)
 
-        print(todo)
         todo.sort()
         if len(todo) == 0:
+            print("nothing to do, advancing time")
             workers.advance_time_to_assign()
 
         assigned = False
+        print("todo is", todo)
         while len(todo) > 0:
-            workers.advance_time_to_assign()
             label = todo.pop(0)
+            print("need to do", label)
             if label not in workers.labels:
                 workers.assign_work(get_time_required(label), label)
                 assigned = True
 
         if not assigned:
-            workers.advance_time_to_complete()
+            workers.advance_time_minimum()
 
     workers.advance_time_to_complete()
+    print("".join(workers.completed))
     print(workers.elapsed)
 
 
