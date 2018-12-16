@@ -4,10 +4,6 @@
 CART_CELLS = {">": (1, 0), "<": (-1, 0), "v": (0, 1), "^": (0, -1)}
 
 
-
-
-
-
 class Matrix:
     def __init__(self, rows):
         self.data = rows
@@ -99,6 +95,7 @@ def main():
     matrix.print()
     carts = matrix.parse_carts()
     carts[0].move(matrix)
+
 
 if __name__ == "__main__":
     main()
