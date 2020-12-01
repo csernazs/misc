@@ -1,16 +1,28 @@
 #!/usr/bin/env python3
 
+from itertools import product
+from functools import reduce
+import operator
+
+
+def mul(numbers):
+    return reduce(operator.mul, numbers)
+
+
 def main():
     numbers = []
     for line in open("aoc_01.txt"):
         numbers.append(int(line))
 
-    for idx1 in range(len(numbers)):
-        for idx2 in range(idx1 + 1, len(numbers)):
-            a = numbers[idx1]
-            b = numbers[idx2]
-            if a + b == 2020:
-                print(a * b)
+    for nums in product(numbers, repeat=2):
+        if sum(nums) == 2020:
+            print(mul(nums))
+            break
+
+    for nums in product(numbers, repeat=3):
+        if sum(nums) == 2020:
+            print(mul(nums))
+            break
 
 
 if __name__ == "__main__":
