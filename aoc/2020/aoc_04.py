@@ -3,16 +3,6 @@
 import sys
 import re
 
-REQUIRED_FIELDS = (
-    "byr",
-    "iyr",
-    "eyr",
-    "hgt",
-    "hcl",
-    "ecl",
-    "pid",
-)
-
 
 def parse_file(path):
     with open(path) as infile:
@@ -65,15 +55,7 @@ def is_valid(pp):
 
 
 def has_required_fields(pp):
-    for required_field in REQUIRED_FIELDS:
-        if required_field not in pp:
-            return False
-
-    return True
-
-
-def solve_1(data):
-    REQUIRED_FIELDS = (
+    required_fields = (
         "byr",
         "iyr",
         "eyr",
@@ -82,7 +64,14 @@ def solve_1(data):
         "ecl",
         "pid",
     )
+    for required_field in required_fields:
+        if required_field not in pp:
+            return False
 
+    return True
+
+
+def solve_1(data):
     cnt = 0
     for passport in data:
         if has_required_fields(passport):
