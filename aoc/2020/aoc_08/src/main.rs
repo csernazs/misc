@@ -1,5 +1,4 @@
 use core::panic;
-use std::convert::TryFrom;
 use std::{
     collections::HashSet,
     fs::File,
@@ -7,15 +6,10 @@ use std::{
 };
 
 #[derive(Debug, Clone, Copy)]
-enum Operation {
-    NOP,
-    ACC,
-    JMP,
-}
-#[derive(Clone)]
-struct Instruction {
-    op: Operation,
-    arg: i16,
+enum Instruction {
+    NOP(i64),
+    ACC(i64),
+    JMP(i64),
 }
 
 #[derive(Debug)]
@@ -32,19 +26,19 @@ fn parse_file(path: String) -> Vec<Instruction> {
     for line_result in reader.lines() {
         let line = line_result.expect("Unable to read line");
         let fields: Vec<&str> = line.split(" ").collect();
-
-        let op = match fields[0] {
-            "acc" => Operation::ACC,
-            "jmp" => Operation::JMP,
-            "nop" => Operation::NOP,
-            _ => panic!("Invalid operation: {}", fields[0]),
-        };
-        let arg = fields[1]
+        let arg: i64 = fields[1]
             .trim_start_matches("+")
             .parse()
             .expect(&format!("Error: {}", fields[1].trim_start_matches("+")));
 
-        retval.push(Instruction { op, arg });
+        let instr = match fields[0] {
+            "acc" => Instruction::ACC(arg),
+            "jmp" => Instruction::JMP(arg),
+            "nop" => Instruction::NOP(arg),
+            _ => panic!("Invalid operation: {}", fields[0]),
+        };
+
+        retval.push(instr);
     }
 
     return retval;
@@ -52,8 +46,8 @@ fn parse_file(path: String) -> Vec<Instruction> {
 
 fn run_program(program: &Vec<Instruction>) -> ProgramResult {
     let mut acc: i64 = 0;
-    let mut ip: usize = 0;
-    let mut seen: HashSet<usize> = HashSet::new();
+    let mut ip: i64 = 0;
+    let mut seen: HashSet<i64> = HashSet::new();
 
     loop {
         if seen.contains(&ip) {
@@ -63,26 +57,24 @@ fn run_program(program: &Vec<Instruction>) -> ProgramResult {
             };
         }
         seen.insert(ip);
-        if ip > program.len() - 1 {
+        if ip as usize > program.len() - 1 {
             return ProgramResult {
                 acc,
                 has_loop: false,
             };
         }
-        let ref instr = program[ip];
-        // println!("ip: {}, op: {:?}, arg: {}", ip, instr.op, instr.arg);
+        let ref instr = program[ip as usize];
 
-        match instr.op {
-            Operation::NOP => {
+        match instr {
+            Instruction::NOP(_) => {
                 ip += 1;
             }
-            Operation::ACC => {
-                acc += i64::from(instr.arg);
+            Instruction::ACC(arg) => {
+                acc += arg;
                 ip += 1;
             }
-            Operation::JMP => {
-                let new_ip = i64::try_from(ip).unwrap() + i64::from(instr.arg);
-                ip = usize::try_from(new_ip).unwrap();
+            Instruction::JMP(arg) => {
+                ip += arg;
             }
         }
     }
@@ -96,18 +88,18 @@ fn solve_2(program: &Vec<Instruction>) -> Option<i64> {
 
     for idx in 0..my_program.len() {
         let ref instr = my_program[idx];
-        my_program[idx].op = match instr.op {
-            Operation::JMP => Operation::NOP,
-            Operation::NOP => Operation::JMP,
-            Operation::ACC => continue,
+        my_program[idx] = match instr {
+            Instruction::JMP(arg) => Instruction::NOP(*arg),
+            Instruction::NOP(arg) => Instruction::JMP(*arg),
+            Instruction::ACC(_) => continue,
         };
         let result = run_program(&my_program);
         if !result.has_loop {
             return Some(result.acc);
         }
-        my_program[idx].op = match my_program[idx].op {
-            Operation::JMP => Operation::NOP,
-            Operation::NOP => Operation::JMP,
+        my_program[idx] = match my_program[idx] {
+            Instruction::JMP(arg) => Instruction::NOP(arg),
+            Instruction::NOP(arg) => Instruction::JMP(arg),
             x => x,
         };
     }
