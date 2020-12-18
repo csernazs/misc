@@ -105,6 +105,13 @@ def test():
     assert evaluate_2("6*7+1+2+3*4*5") == 6 * (7 + 1 + 2 + 3) * 4 * 5
 
 
+def test_with_input():
+    lines = parse_file("aoc_18.txt")
+
+    assert solve_1(lines) == 11297104473091
+    assert solve_2(lines) == 185348874183674
+
+
 def main():
     lines = parse_file("aoc_18.txt")
     print("solve_1", solve_1(lines))
