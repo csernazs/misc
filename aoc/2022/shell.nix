@@ -1,0 +1,10 @@
+{ pkgs ? import <nixpkgs> {} }:
+
+let
+  unstable = import <nixos-unstable> { config = { allowUnfree = true; }; };
+in pkgs.mkShell {
+  buildInputs = with pkgs; [
+    python3Packages.icecream
+    bashInteractive
+  ];
+}
