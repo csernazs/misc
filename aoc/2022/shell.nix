@@ -6,6 +6,7 @@ in pkgs.mkShell {
   buildInputs = with pkgs; [
     python3Packages.pytest
     python3Packages.icecream
+    python3Packages.mypy
     bashInteractive
   ];
 }
