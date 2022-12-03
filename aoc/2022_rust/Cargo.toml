@@ -1,0 +1,15 @@
+[package]
+name = "aoc2022"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "aoc_03"
+path = "src/aoc2022/aoc_03.rs"
+
+[dependencies]
+fixture = "0.3.1"
+indoc = "1.0.7"
+rstest = "0.16.0"
