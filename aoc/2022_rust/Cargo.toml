@@ -9,6 +9,10 @@ edition = "2021"
 name = "aoc_03"
 path = "src/aoc2022/aoc_03.rs"
 
+[[bin]]
+name = "aoc_04"
+path = "src/aoc2022/aoc_04.rs"
+
 [dependencies]
 fixture = "0.3.1"
 indoc = "1.0.7"
