@@ -41,16 +41,21 @@ class Directory:
         subdir = self.dirs[path[0]]
         return subdir.get_dir(path[1:])
 
-    def ensure_dir(self, path: list[str]) -> "Directory":
-        if path == []:
+    def ensure_dir(self, path: list[str] | str) -> "Directory":
+        if isinstance(path, str):
+            parts = path.split("/")
+        else:
+            parts = path
+
+        if parts == []:
             return self
 
-        if path[0] not in self.dirs:
-            subdir = self.add_dir(Directory(path[0]))
+        if parts[0] not in self.dirs:
+            subdir = self.add_dir(Directory(parts[0]))
         else:
-            subdir = self.dirs[path[0]]
+            subdir = self.dirs[parts[0]]
 
-        return subdir.ensure_dir(path[1:])
+        return subdir.ensure_dir(parts[1:])
 
     def iter_files(self) -> Iterable[File]:
         for file in self.files.values():
@@ -114,7 +119,7 @@ def parse(lines: list[str]):
                 current_dir = current_dir.parent
             else:
                 current_path.append(change_dir)
-                current_dir = current_dir.ensure_dir([change_dir])
+                current_dir = current_dir.ensure_dir(change_dir)
 
         elif line == "$ ls":
             state = S_LS
@@ -172,10 +177,10 @@ def root_dir() -> Directory:
     root_dir = Directory("/")
     root_dir.add_file(File("b.txt", 14848514))
     root_dir.add_file(File("c.dat", 8504156))
-    dir_a = root_dir.ensure_dir(["a"])
-    dir_d = root_dir.ensure_dir(["d"])
+    dir_a = root_dir.ensure_dir("a")
+    dir_d = root_dir.ensure_dir("d")
 
-    dir_e = dir_a.ensure_dir(["e"])
+    dir_e = dir_a.ensure_dir("e")
     dir_a.add_file(File("f", 29116))
     dir_a.add_file(File("g", 2557))
     dir_a.add_file(File("h.lst", 62596))
