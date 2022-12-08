@@ -7,6 +7,7 @@ in pkgs.mkShell {
     python3Packages.pytest
     python3Packages.icecream
     python3Packages.mypy
+    python3Packages.numpy
     bashInteractive
   ];
 }
