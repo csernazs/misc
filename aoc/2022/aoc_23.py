@@ -3,7 +3,7 @@
 from collections import defaultdict, deque
 from dataclasses import dataclass
 import sys
-from typing import Iterable
+from typing import Iterable, Optional
 
 import pytest
 
@@ -31,14 +31,12 @@ class Rule:
             return pos
 
 
-rules = deque(
-    [
-        Rule(checks=[(-1, 0), (-1, 1), (-1, -1)], new_pos=(-1, 0)),
-        Rule(checks=[(1, 0), (1, 1), (1, -1)], new_pos=(1, 0)),
-        Rule(checks=[(0, -1), (-1, -1), (1, -1)], new_pos=(0, -1)),
-        Rule(checks=[(0, 1), (-1, 1), (1, 1)], new_pos=(0, 1)),
-    ]
-)
+rules = [
+    Rule(checks=[(-1, 0), (-1, 1), (-1, -1)], new_pos=(-1, 0)),
+    Rule(checks=[(1, 0), (1, 1), (1, -1)], new_pos=(1, 0)),
+    Rule(checks=[(0, -1), (-1, -1), (1, -1)], new_pos=(0, -1)),
+    Rule(checks=[(0, 1), (-1, 1), (1, 1)], new_pos=(0, 1)),
+]
 
 
 def get_neighbours(pos: P) -> PSET:
@@ -93,7 +91,7 @@ def get_shape(elves: PSET) -> tuple[P, P]:
 
 def empty_spaces(elves: PSET):
     tl, br = get_shape(elves)
-    area = (br[0] - tl[0]) * (br[1] - tl[1])
+    area = (br[0] - tl[0] + 1) * (br[1] - tl[1] + 1)
     return area - len(elves)
 
 
@@ -109,6 +107,7 @@ def parse(lines: list[str]) -> PSET:
 
 
 def print_elves(elves: PSET):
+    return
     tl, br = get_shape(elves)
     print(tl, br)
     for rowidx in range(tl[0], br[0] + 1):
@@ -120,10 +119,10 @@ def print_elves(elves: PSET):
         sys.stdout.write("\n")
 
 
-def part01(elves: PSET):
-    # first half
+def run_elves(elves: PSET, limit: int) -> tuple[PSET, int]:
+    rules_q = deque(rules)
 
-    for _ in range(10):
+    for iter_cnt in range(limit):
         elves_list = list(elves)
 
         print_elves(elves)
@@ -131,20 +130,19 @@ def part01(elves: PSET):
         new_positions: dict[P, list[int]] = defaultdict(list)
 
         for idx, elf in enumerate(elves_list):
-            print("processing", elf)
             neighbours = get_neighbours_elves(elf, elves)
             if not neighbours:
-                print("stays")
+                ## print(elf, "stays")
                 new_positions[elf].append(idx)
             else:
-                for rule in rules:
+                for rule in rules_q:
                     new_pos = rule.move(elf, elves)
                     if new_pos != elf:
-                        print("goes to", new_pos)
+                        ## print(elf, "goes to", new_pos)
                         new_positions[new_pos].append(idx)
                         break
                 else:  # not terminated by break
-                    print("stays")
+                    ## print(elf, "stays")
                     new_positions[elf].append(idx)
 
         new_elves: PSET = set()
@@ -156,15 +154,32 @@ def part01(elves: PSET):
                     new_elves.add(elves_list[elf_idx])
 
         if new_elves == elves:
-            return empty_spaces(elves)
+            return (elves, iter_cnt + 1)
         else:
-            rules.rotate(-1)
+            rules_q.rotate(-1)
             elves = new_elves
 
-    return empty_spaces(elves)
+    return (elves, iter_cnt + 1)
+
+
+def part01(elves: PSET) -> int:
+    final, _ = run_elves(elves, 10)
+
+    return empty_spaces(final)
+
+
+def part02(elves: PSET) -> int:
+    final, iter_cnt = run_elves(elves, sys.maxsize)
+
+    return iter_cnt
+
 
 def main():
-    pass
+    with open("aoc_23.txt") as infile:
+        lines = [x.strip() for x in infile]
+    parsed = parse(lines)
+    print(part01(parsed))
+    print(part02(parsed))
 
 
 @pytest.fixture
@@ -251,8 +266,21 @@ def test_part01(sample: PSET):
     assert part01(sample) == 110
 
 
+def test_part02(sample: PSET):
+    assert part02(sample) == 20
+
+
 def test_part01_small(small_sample: PSET):
-    part01(small_sample)
+    final, _ = run_elves(small_sample, 10)
+    assert final == {
+        (0, 2),
+        (1, 4),
+        (2, 0),
+        (3, 4),
+        (5, 2),
+    }
+
+    assert empty_spaces(final) == 4 + 4 + 4 + 4 + 5 + 4
 
 
 if __name__ == "__main__":
