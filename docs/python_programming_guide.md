@@ -309,6 +309,40 @@ point where it is no longer needed.
 When writing an API, consider implementing a context manager if your code is
 using some external resource.
 
+## Program style and unification
+
+If an existing code needs to be changed, it should be done in a way as the
+original code was written, regardless which would be the "better" solution.
+
+For example if a python code uses `str.format` method to format string, the
+code which is added should also use that way to format the strings (instead of
+f-strings). Same applies to pathlib. Path vs str paths.
+
+Regardless to say that upgrading the code and moving forward is a required thing
+with every code but I think that unification is more important.
+
+Refactoring can be done however with some parts of the code also, but that part
+should be definied clearly.
+
+
+## One language
+
+If it is possible, a code should be written in one language only. This means
+that if some python code was written, it may run external programs, but those
+should belong to other software (I have no problem with running `cp` instead of
+using `shutil`, also it may be easier to run `ping` than writing it with the
+`socket` module).
+
+But if some functionality can be implemented in python better, and cleaner, it
+should not be run by external code. For example `grep` should not be used from a
+python code as it can filter the lines, and apply regexp.
+
+There is one important exeptions to these, which is the performance of the code,
+it is feasible and recommended way to call into C/C++ or rust or whatever
+language which is more perfomant than python, but only if the performance is
+crucial.
+
+
 ## Tests
 
 Use pytest for test writing. Use fixtures as much as possible.
