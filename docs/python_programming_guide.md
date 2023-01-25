@@ -324,6 +324,130 @@ with every code but I think that unification is more important.
 Refactoring can be done however with some parts of the code also, but that part
 should be definied clearly.
 
+## CLI is a lib + entry point
+
+A command-line program is just a library, and it has an entry point defined by
+setuptools or by other way.
+This usually has an `Application` class with a `main` function.
+
+I usually do the argument parsing with `argparse`, but the point here is that
+instead of using `sys.argv` directly, there should be a help for `--help`, which
+also implies that there is a description (either programmatically or not)
+somewhere about the CLI parameters.
+
+For a larger CLI program, this `Application` class has the only purpose of
+parsing the command line arguments, setting up logging, and whatever resources
+needs to be set up and then passes the control to the lib. In other words it
+should not contain business logic.
+
+## What a lib code must never ever do
+
+* Calling `sys.exit()` or raising `SystemExit`
+* printing to stdout
+* In general: using stdout, stderr and stdin directly
+
+## Custom exceptions
+
+For a larger app, create a base exeption class which will be used for all
+exceptions defined in that code:
+
+```python
+
+class Error(Exception):
+    pass
+
+class MyError(Error):
+    pass
+```
+
+So the user of your library can do:
+
+```python
+from foo.exc import Error
+
+try:
+    foo.whatever()
+except foo.Error as err:
+    ...
+```
+
+The larger app should define all the exceptions in a well defined python submodule
+in it (`exc.py`, `error.py`, `exceptions.py`, whatever).
+
+Also, decide if you want to re-use exceptions. I mostly re-use:
+
+* `ValueError`: when the specified value for the function is out of bounds, or invalid
+* `TypeError`: when isinstance fails
+
+But as the code grows, it should use its own exceptions instead.
+
+Exceptions which must never ever be re-used:
+
+* `RuntimeError` is for python internals
+
+*watch this space* :)
+
+## Idiomatic way of using datetime
+
+`import datetime as dt`
+
+
+## Handling current time
+
+When current time is queried, this should be taken very carefully to not query
+it again within the code segment you want to keep in sync, it is sometimes the
+whole app.
+
+The reason for this is the time passes between the calls and if you check the
+date in the first call to be Sunday but the additional code also checks it (for
+whatever reason) then it can be Monday for the next call and if you want to
+behave consistently then you need to "stop" the time for this case.
+
+Needless to say if your code works with passing time (eg it calculates the
+elapsed time, or it relies on the passing time), then it does not make any
+sense.
+
+In the library code, it is good to accept it as a parameter from the outside
+(see the hexagon pattern I described above), this helps testing a lot also.
+
+## Measuring elapsed time
+
+This should be done by `time.monotonic()` or `time.perf_counter()`, but not with
+`time.time()`.
+
+
+## Handling global state
+
+It is good to avoid global variables, but there are cases when it is acceptable,
+such case is logging where the code obtains the logger object (which is somewhat
+global).
+
+But all of the global state needs to be handled very carefully. In Linux there
+are a couple of global properties of the process so if a code changes it, then
+it will affect other code.
+To deal with it, one may use a context manager which ensures that the values are
+restored to their original state. I really like context managers to handle
+resources, and this is another good examples.
+
+Such global states are (list is not full):
+
+* signal handlers
+* current working directory
+* environment variables
+* ulimits, rlimits
+* capabilities
+* time?
+
+
+If possible, it is a good way to set these at the beginning and then not change
+them at all, or have the context manager I mentioned to keep them under control.
+
+Setting some global states can be (and should be) avoided, such as:
+
+* current working directory: use absolute path
+* environment variables: set the environment variables when you are running a
+  subprocess (there's an API for this)
+
 
 ## One language
 
