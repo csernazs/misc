@@ -140,6 +140,10 @@ In class methods:
   called, eg `from_json` or `from_dict` specifies the type of the data which
   will be used to initialize the object.
 
+
+Exception class names should end with `Error`.
+
+
 ## No side effects in `__init__`
 
 If it is possible, there should be no side effects in `__init__`. If it is not
@@ -447,6 +451,77 @@ Setting some global states can be (and should be) avoided, such as:
 * current working directory: use absolute path
 * environment variables: set the environment variables when you are running a
   subprocess (there's an API for this)
+
+## Singleton
+
+Singleton is a global variable, so there are some clever solutions on the
+internet how can you create a class which returns the same instance, mostly with
+`__new__` or others.
+
+There's one problem with it. It really does not allow to instantiate a new
+object. If you want to tweak something for your tests for example, you are
+stuck.
+
+So for this "singleton" like behavior, it is better to store the instance
+variable at module level:
+
+```python
+class MySingleton:
+    ...
+
+myvar = MySingleton()
+```
+
+And then use `myvar` everywhere. You can implement a function returning this if
+you want and add an underscore to this variable to sign that nobody should
+access it directly.
+
+```python
+def get_var():
+    return myvar
+```
+
+
+## Units
+
+This is about the real units, like seconds, meters, pixels, whatever.
+These are very important. Some team has crashed a probe to the surface of Mars
+because they used different systems (imperial vs metric).
+
+Either the variable name should suggest the unit like this:
+
+```python
+def sleep(secs: float):
+    ...
+```
+
+...or the docstring:
+
+```python
+def sleep(duration: float):
+    """
+    :param duration: amount of time to spent in seconds
+    """
+    ...
+```
+
+## Frozen dataclasses
+
+It is a good thing to always make the dataclasses frozen:
+
+```python
+
+@dataclass(frozen=True)
+class Person:
+    name: str
+    age: int
+```
+
+So it will make it hashable (you can add it to sets and use as keys in dict).
+But on the other hand, it makes it virtually impossible to change the fields
+once the class is instantiated. This is good because if you add some validators
+to `__post_init__` then it can provide some constraints on the data.
+Also, it is good to have immutable types in the program as a rule of thumb.
 
 
 ## One language
