@@ -3,15 +3,17 @@
 
 ## Intro
 
-Despite the title, this document is mainly about how I write python code, which
-principles I use, and what I think about a well written code.
+Despite the title, this document describes how I write python code, what
+principles I use, and what I think about a well written code. This is solely my
+own thinking and in its current form, it is nothing to do with others.
 
 ## Users
 
 Every code should take the users, and the usage into consideration. For example there's a
 different approach between a publicly facing website vs a script which is used
 by just a few users. Code quality, test coverage, etc, can vary between these
-cases.
+cases. Every code which is written should focus on their users, to improve their
+quality of living to make their life easier, not harder.
 
 ## Structure of a python program
 
@@ -22,71 +24,83 @@ have seen or worked with), should have the following parts:
 2. parses it into some data representation (into plain old python objects or
    data classes, or DAO or something)
 3. validates the data
-4. does the processing on the abstract data
+4. does the processing on the abstract data structure
 5. persist the end result (writes to stdout, file, persist in DB, etc..)
 
 This is somewhat similar to the [hexagon
 architecture](https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)).
 
 The key point in the above design is that all parts of the code, mostly the 1-3,
-4, 5 parts should be implemented indepently. That means that data processing should
+4, 5 parts should be implemented independently. That means that data processing should
 have no knowledge about how the data was collected.
+
+This helps a lot testing the business logic (4. step).
+
+In the following sections we go through each of the steps above.
 
 ### Data reading and pre-parsing
 
-This is the step where the IO part is separated from everything. Not only the
-actual IO part, but also the data transformation and the parsing of the data
+This is the step where the I/O part is separated from everything. Not only the
+actual I/O part, but also the data transformation and the parsing of the data
 format is done here.
 
 If there's a `foo.txt` file, which should be processed line by line, then it
-should return the lines of the file in a string, with an decoding applied.
+should return the lines of the file in a string, with some decoding applied.
 
-If the file is `foo.json`, it should parse the json to a python dict or list or
-whatever it have.
+If the file is `foo.json`, it should parse the json to python native types
+(dict, list, int, string, etc...).
 
-If the file is `foo.yaml`, it should parse the yaml to a python dict or list or
-whatever it have.
+If the file is `foo.yaml`, it should parse the yaml to python native types
+(dict, list, int, string, etc...).
 
-By that means, each of these can procude a list of string so those can be passed
-to the next layer.
+Once the data is loaded to the memory, it usually loses the origin, where it was
+loaded from. For example, if we receive a list of strings at the end, we should
+not know what was the original format.
+
+This gives flexibility in terms of re-factoring, if one file format turns out to
+be infeasible.
+
+Note should be taken here, that while the origin is lost, when an error happens
+(see the detalis below) it is crucial to inform the user about the source (eg.
+the file path), so they will know, which file caused the error.
 
 
 ### Parsing
 
-The data received in the previous step should be parsed into some abstract data
+The data received in the previous step is now parsed into some abstract data
 type. This should receive a pre-processed data, eg not raw data but some data
-consisting of python list, dict, string, int, etc.
+consisting of python native types, such as list, dict, string, int, etc.
 
 At the end of the parsing, an abstract data structure should be resulted where
 the type conversion are done to the native python type and also some container
 objects (plain old python object, dataclass, etc) are created at the end. There
-should be no dicts of pre-defined keys, or such.
+should be no dicts of pre-defined keys, or such beyond this point.
 
 Data object may have methods to look up data in them.
 
-This abstract data structure should be indepenent from the parser, and it should
-be possible to create this structure programmatically.
+This abstract data structure should be independent from the parser, and it
+should be possible to create this structure programmatically (eg. without
+parsing an actual json file).
 
 For parsing I ususally create `from_dict` or `from_json` classmethods for the
-classes, which accept the data from the parsers and `to_json` or `to_dict` which
-serializes the data. By this way, these classes can be tested better as they
-have their own methods.
+dataclasses, which accept the data from the parsers and `to_json` or `to_dict`
+which serializes the data. By this way, these classes can be tested better as
+they have their own methods.
 
 
 ### Validating
 
 There are different aspects of the validation and it depends hugely of the
 target users, the task and the whole program. In some cases it can be left out
-without any issue, eg when the users are limited, the code is not running in any
-end-product and nothing can go wrong (beyond having an unhandled exception at
-maximum).
-
+without any issue, for example, when the list of the users is limited, the code
+is not running in any end-product and nothing can go wrong (beyond having an
+unhandled exception at maximum).
 
 In every other cases there should be a validation step, which again can be some
 minimum thing to help the user to a full validation (eg in a user facing web app
-served publicly) where having an unhandled exception is not possible.
+served publicly) where having an unhandled exception is not acceptable.
 
-This also raises the topic of error message, i18n, and such.
+This also opens the topic of error message, i18n, and such.
 
 ### Processing
 
@@ -94,6 +108,11 @@ The processing code should work on an abstract data sctructure which can be
 provided as-is, so that makes the processing code testable. For example if the
 real data comes from a database, then the processing code can
 still be tested without the requirement of a runnning database service.
+
+I like to separate the classes which hold the data and have some basic/trivial
+metods to look up/edit some data, and the classes which do the processing
+(business logic). This also helps if the processing needs to take multiple data
+objects.
 
 ### Persisting
 
@@ -103,28 +122,30 @@ lists, etc).
 
 This is then written to some file on the disk.
 
+Similar to loading, this layer should also be flexible, in terms of file format
+or target.
 
 
 ## Naming convention
 
 ...with some notable exceptions:
+
 * Class names should be nouns.
-* Callable object, (eg. methods, functions) should be verbs.
+* Callable object, (eg. methods, functions) should start with verbs.
 * Attributes should be nouns.
 
 There's a well defined scheme for defining function/method names, which should
-guarantee the behavior.
+guarantee the behavior and define a contract for the developer.
 
 * Starting with `get_`: function should not change any value in the object or in
   anything. Definitely not having any side effect, such as modifying a file
   content.
 * Starting with `create_`: function should create some object or file or
-  database record. If there is some uniqueness to be guaranteed, then it should
-  raise an exception. Eg. if a file to be created already exists, that would be
-  the proper behavior.
+  database record. If uniqueness is required, then it should raise an exception.
+  Eg. if a file to be created already exists, that would be the proper behavior.
 * Starting with `ensure_`: similar to create, but the object may be existing and
-  that must be handled without raising exception. It should also guaranntee that
-  in such case, the existing object is not modified.
+  that must be handled without raising exception. It also ensures that in such
+  case, the existing object is not modified.
 * Starting with `update_`: update some existing state. This should definitely
   not create anything new data. If the object to be updated does not exist, then
   it should raise an exception.
@@ -148,7 +169,7 @@ Exception class names should end with `Error`.
 
 If it is possible, there should be no side effects in `__init__`. If it is not
 possible, there should be a way to disable the side effect. For example if
-there's a class wanting to connect to the database, there should be a boolean
+there's a class wanting to connect to the database, there should be a (boolean)
 parameter specifying whether to allow the `__init__` to connect to the db.
 
 ## Limit the exceptions in properties
@@ -164,9 +185,20 @@ user, eg from this code:
 ```python
 foo.bar
 ```
-The only possible exception should be `AttributeError` and nothing else. For
-example, if there's a file operation in the property (which could raise IO error), then it should be
-converted to a method instead, or the exception should be handled properly.
+
+The only acceptable exception should be `AttributeError` and nothing else. For
+example, if there's a file operation in the property (which could raise I/O
+error), then it should be converted to a method instead, or the exception should
+be handled properly.
+
+Also, handling the exception looks strange:
+
+```
+try:
+    foo.bar
+except OSError:
+    ...
+```
 
 ## Exceptions vs None as return value
 
@@ -175,6 +207,9 @@ consideration. I prefer returning with `None` in most of the cases.
 
 For example if there's a `find_foo` method, then it is fine to return `None` if the
 object is not found.
+
+Whether the program could continue in the case the caller code not checking the
+`None` value should be taken into account.
 
 
 ## Defining constants or superglobals
@@ -196,7 +231,7 @@ This is to avoid the situation where some code is doing:
 from constants import FOO
 ```
 
-While the other is doing
+While the other (test code, for example) is doing
 ```python
 import constants
 constants.FOO = 345
@@ -277,7 +312,7 @@ function definitions (at least).
 
 Use `mypy` or some other type checker.
 
-Sometimes it is also good to have different classes by the contents. Some weird
+Sometimes it is also good to have different classes by the values. Some weird
 example:
 
 ```python
@@ -313,6 +348,10 @@ point where it is no longer needed.
 When writing an API, consider implementing a context manager if your code is
 using some external resource.
 
+Context managers are also a must when some process-global state is modified (eg.
+current directory, environment variable) and their lifetime needs to be
+controlled (in other words: it needs to be restored to their previous value).
+
 ## Program style and unification
 
 If an existing code needs to be changed, it should be done in a way as the
@@ -322,8 +361,8 @@ For example if a python code uses `str.format` method to format string, the
 code which is added should also use that way to format the strings (instead of
 f-strings). Same applies to pathlib. Path vs str paths.
 
-Regardless to say that upgrading the code and moving forward is a required thing
-with every code but I think that unification is more important.
+Needless to say that upgrading the code and moving forward is a required thing
+with every piece of code but I think that unification is more important.
 
 Refactoring can be done however with some parts of the code also, but that part
 should be definied clearly.
@@ -341,8 +380,10 @@ somewhere about the CLI parameters.
 
 For a larger CLI program, this `Application` class has the only purpose of
 parsing the command line arguments, setting up logging, and whatever resources
-needs to be set up and then passes the control to the lib. In other words it
-should not contain business logic.
+needs to be set up (calling functions to parse config files, or load data) and
+then passes the control to the lib. In other words it should not contain
+business logic, unless it is so little and trivial that creating a separate
+function or class would be overkill.
 
 ## What a lib code must never ever do
 
@@ -375,8 +416,8 @@ except foo.Error as err:
     ...
 ```
 
-The larger app should define all the exceptions in a well defined python submodule
-in it (`exc.py`, `error.py`, `exceptions.py`, whatever).
+The larger app should define all the exceptions in a well defined python
+submodule in it (`exc.py`, `error.py`, `exceptions.py`, etc).
 
 Also, decide if you want to re-use exceptions. I mostly re-use:
 
@@ -395,6 +436,9 @@ Exceptions which must never ever be re-used:
 
 `import datetime as dt`
 
+Acceptable in some cases:
+
+`from datetime import datetime`
 
 ## Handling current time
 
@@ -407,17 +451,24 @@ date in the first call to be Sunday but the additional code also checks it (for
 whatever reason) then it can be Monday for the next call and if you want to
 behave consistently then you need to "stop" the time for this case.
 
-Needless to say if your code works with passing time (eg it calculates the
-elapsed time, or it relies on the passing time), then it does not make any
-sense.
-
 In the library code, it is good to accept it as a parameter from the outside
-(see the hexagon pattern I described above), this helps testing a lot also.
+(see the hexagon pattern I described above), this helps testing a lot also, as
+code which is tested will be run in a well defined environment and won't be
+subject to the actual date or time.
+
+It should be never assumed that between two `datetime.now()` calls there's so
+little time that going from one day to the next one impossible.
+
+Needless to say if the code works with passing time (eg it calculates the
+elapsed time, or it relies on the passing time), then it does not make any
+sense. In such case the code must be prepared for backward ticking time by using
+monotonic time (see below).
+
 
 ## Measuring elapsed time
 
 This should be done by `time.monotonic()` or `time.perf_counter()`, but not with
-`time.time()`.
+`time.time()` as it can go backward.
 
 
 ## Handling global state
@@ -429,9 +480,10 @@ global).
 But all of the global state needs to be handled very carefully. In Linux there
 are a couple of global properties of the process so if a code changes it, then
 it will affect other code.
+
 To deal with it, one may use a context manager which ensures that the values are
 restored to their original state. I really like context managers to handle
-resources, and this is another good examples.
+resources, and this is another good example.
 
 Such global states are (list is not full):
 
@@ -450,7 +502,8 @@ Setting some global states can be (and should be) avoided, such as:
 
 * current working directory: use absolute path
 * environment variables: set the environment variables when you are running a
-  subprocess (there's an API for this)
+  subprocess (there's an API for this, for example the `env` parameter of the
+  `subprocess.run` function).
 
 ## Singleton
 
@@ -459,8 +512,8 @@ internet how can you create a class which returns the same instance, mostly with
 `__new__` or others.
 
 There's one problem with it. It really does not allow to instantiate a new
-object. If you want to tweak something for your tests for example, you are
-stuck.
+object (unless you do hacks). If you want to tweak something for your tests for
+example, you are stuck.
 
 So for this "singleton" like behavior, it is better to store the instance
 variable at module level:
@@ -478,14 +531,14 @@ access it directly.
 
 ```python
 def get_var():
-    return myvar
+    return _myvar
 ```
 
 
 ## Units
 
 This is about the real units, like seconds, meters, pixels, whatever.
-These are very important. Some team has crashed a probe to the surface of Mars
+These are very important. Some team crashed a probe to the surface of Mars
 because they used different systems (imperial vs metric).
 
 Either the variable name should suggest the unit like this:
@@ -534,10 +587,11 @@ using `shutil`, also it may be easier to run `ping` than writing it with the
 
 But if some functionality can be implemented in python better, and cleaner, it
 should not be run by external code. For example `grep` should not be used from a
-python code as it can filter the lines, and apply regexp.
+python code as python can filter the lines, by a regexp wiht a few lines of
+code.
 
-There is one important exeptions to these, which is the performance of the code,
-it is feasible and recommended way to call into C/C++ or rust or whatever
+There is one important exeptions to these, which is the performance of the code.
+It is feasible and recommended way to call into C/C++ or rust or whatever
 language which is more perfomant than python, but only if the performance is
 crucial.
 
@@ -549,17 +603,19 @@ Use pytest for test writing. Use fixtures as much as possible.
 Separate the tests:
 * unit: focus on a single class, module
 * integration: focus on how the classes, modules work together
-* e2e: testing IO and dependency on the outer world
+* e2e: testing I/O and dependency on the outer world, may run external programs
 
 If you follow the _Structure of a python program_ descibed above, you can write:
 
 * unit tests for parsing
 * integration tests for processing
-* e2e tests for IO (reading, persisting data)
+* e2e tests for I/O (reading, persisting data)
 
 As unit and integration tests does not depend on any resources, those can be
 written for every little edge cases, while e2e tests should only focus on the
-IO, eg to check if the 3rd party library is working as expected, nothing more.
+I/O, compatibility with external processes or resources. While unit tests may
+"see" the code which is tested, e2e should use a black-box model, having no
+information about the implementation details.
 
 Use `assert`s as much as possible, for me it is completely ok to have a test
 function with multiple asserts, eg checking various attributes of an object.
@@ -570,6 +626,9 @@ fixture.
 
 For mocking I prefer to use the `pytest-mocker` plugin.
 
+Create coverage reports. 100% is not a target, and not the percentage which
+matters but the uncovered lines. Some IDEs have plugins which can show the
+results instantly, but a html can also be rendered from the coverage report.
 
 # Usability, UX
 
@@ -602,7 +661,7 @@ If this issue cannot be fixed, we should inform the user to contact the group
 responsible for the software.
 
 Tracebacks should be avoided at all places where we know what the error was. CLI
-code should handle exceptions whenever possible, for example file IO errors
+code should handle exceptions whenever possible, for example file I/O errors
 should be communicated without traceback.
 
 Tracebacks are reserverd for internal, unhandled, most serious errors where the
