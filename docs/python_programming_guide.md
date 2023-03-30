@@ -5,7 +5,7 @@
 
 Despite the title, this document describes how I write python code, what
 principles I use, and what I think about a well written code. This is solely my
-own thinking and in its current form, it is nothing to do with others.
+own thinking and in its current form, it has nothing to do with others.
 
 ## Users
 
