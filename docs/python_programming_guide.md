@@ -673,3 +673,19 @@ If it makes sense, the CLI should have a `status` subcommand, which similar to
 `git` would show what is the current status. It should provide details about
 what is set up, probably from the configuration files, and also about what the
 user could possibly do next.
+
+### Logging
+
+Users should receive log messages even if the program works normally. They
+should receive some message when the processing will take long time, or when
+some checkpoint is reached in the processing.
+
+They should be warned if something takes longer than expected.
+
+Errors should always be communicated and visible.
+
+Debug messages are optional and can help debugging but these are disabled by
+default to avoid confusion.
+
+Logging to file should have timestamps while logging to the user does not
+requires timestamps.
