@@ -569,3 +569,48 @@ where I collect all the resources the test needs and then yield this from a
 fixture.
 
 For mocking I prefer to use the `pytest-mocker` plugin.
+
+
+# Usability, UX
+
+## CLI
+
+### Error messages
+
+Error messages for the users should contain the exact error we found, and it
+must be:
+1. explicit: the error should be communicated with no frills, however context
+   may be added to it.
+2. real: This is not acceptable to say that "No such file" for a file which exists.
+
+
+There are two categories of the errors:
+1. it is fixable by the user
+2. it is not fixable by the user
+
+When it is fixable by the user, it should be communicated to them. For example if
+there's not sufficient free space, we should also communicate where to look for
+possibly removable content.
+
+If a config file missing, we should inform the user how to create the config
+file.
+
+If a config seems to be a temporary issue, the user should know what they can
+give it another try.
+
+If this issue cannot be fixed, we should inform the user to contact the group
+responsible for the software.
+
+Tracebacks should be avoided at all places where we know what the error was. CLI
+code should handle exceptions whenever possible, for example file IO errors
+should be communicated without traceback.
+
+Tracebacks are reserverd for internal, unhandled, most serious errors where the
+error is most likely caused by a bug in the code.
+
+### status
+
+If it makes sense, the CLI should have a `status` subcommand, which similar to
+`git` would show what is the current status. It should provide details about
+what is set up, probably from the configuration files, and also about what the
+user could possibly do next.
