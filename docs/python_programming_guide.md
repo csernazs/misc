@@ -116,7 +116,7 @@ objects.
 
 ### Persisting
 
-Persistance is usually done by the methods of the objects keeping the data, so
+Persistence is usually done by the methods of the objects keeping the data, so
 at the end they will produce some json or yaml serializable data (eg dicts,
 lists, etc).
 
@@ -138,7 +138,7 @@ There's a well defined scheme for defining function/method names, which should
 guarantee the behavior and define a contract for the developer.
 
 * Starting with `get_`: function should not change any value in the object or in
-  anything. Definitely not having any side effect, such as modifying a file
+  anything. Definitely not having any side effect, such as modifying file
   content.
 * Starting with `create_`: function should create some object or file or
   database record. If uniqueness is required, then it should raise an exception.
@@ -443,18 +443,21 @@ Acceptable in some cases:
 ## Handling current time
 
 When current time is queried, this should be taken very carefully to not query
-it again within the code segment you want to keep in sync, it is sometimes the
-whole app.
+it again within the code segment you want to keep the time freezed. This code
+segment is sometimes the whole app.
 
-The reason for this is the time passes between the calls and if you check the
-date in the first call to be Sunday but the additional code also checks it (for
-whatever reason) then it can be Monday for the next call and if you want to
-behave consistently then you need to "stop" the time for this case.
+The reason for this is the fact that time passes between the calls and if you
+check the date in the first call to be Sunday but the additional code also
+checks it (for whatever reason) then it can be Monday for the next call and if
+you want to behave consistently then you need to "stop" the time for this case.
 
-In the library code, it is good to accept it as a parameter from the outside
-(see the hexagon pattern I described above), this helps testing a lot also, as
-code which is tested will be run in a well defined environment and won't be
-subject to the actual date or time.
+Also, if you work with local time or utc, this can go backward and could end up
+in surprising results having negative elapsed time.
+
+In the library code, it is good to accept the current time as a parameter from
+the outside (see the hexagon pattern I described above), this helps testing a
+lot, as code which is tested will be run in a well defined environment and
+won't be subject to the actual date or time.
 
 It should be never assumed that between two `datetime.now()` calls there's so
 little time that going from one day to the next one impossible.
