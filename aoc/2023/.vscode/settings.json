@@ -1,0 +1,11 @@
+{
+    "editor.formatOnSave": true,
+    "nixEnvSelector.nixFile": "${workspaceRoot}/shell.nix",
+    "python.analysis.typeCheckingMode": "strict",
+    "[python]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true,
+            "source.unusedImports": true,
+        }
+    }
+}
