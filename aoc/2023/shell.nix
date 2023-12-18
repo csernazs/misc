@@ -4,11 +4,11 @@ let
   unstable = import <nixos-unstable> { config = { allowUnfree = true; }; };
 in pkgs.mkShell {
   buildInputs = with pkgs; [
-    python3Packages.pytest
-    python3Packages.icecream
-    python3Packages.mypy
-    python3Packages.numpy
-    python3Packages.pillow
+    python311Packages.pytest
+    python311Packages.icecream
+    python311Packages.mypy
+    python311Packages.numpy
+    python311Packages.pillow
     bashInteractive
   ];
 }
