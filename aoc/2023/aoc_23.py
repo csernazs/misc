@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import Callable, Iterable
 
+import networkx as nx
 import pytest
 
 PATH = 1
@@ -45,24 +46,6 @@ def parse_lines(lines: Iterable[str]) -> GRID_INT:
             row.append(char_map[char])
         rows.append(row)
     return rows
-
-
-"""
-
-#.###
-#...#
-#.#.#
-#...#
-#.###
-
-#1###
-#234#
-#3#5#
-#476#
-#5###
-
-
-"""
 
 
 def condition_with_slopes(type: int, dir: PAIR) -> bool:
@@ -119,17 +102,11 @@ def walk(
         qi = queue.popleft()
         pos = qi.route[-1]
 
-        if iter_cnt % 10000 == 0:
-            print(len(queue), len(routes), len(qi.route))
-
         if pos == target:
             for idx, route_pos in enumerate(qi.route):
                 if grid[route_pos[0]][route_pos[1]].max_distance < idx + 1:
                     grid[route_pos[0]][route_pos[1]].max_distance = idx + 1
-            print("new route", len(qi.route))
             routes.append(qi.route.copy())
-            # print_grid(grid)
-
             continue
 
         current = grid[pos[0]][pos[1]]
@@ -154,9 +131,6 @@ def walk(
             new_tile = grid[new_pos[0]][new_pos[1]]
 
             if condition(new_tile.type, dir):
-                # if current.max_distance - new_tile.max_distance > 0 or new_tile.max_distance == 0:
-                #     new_tile.max_distance = current.max_distance + 1
-
                 new_pos_list.append(new_pos)
 
         if len(new_pos_list) == 1:
@@ -313,96 +287,54 @@ def part_01(grid_int: GRID_INT) -> int:
     return len(max(routes, key=len)) - 1
 
 
-def part_02_old(grid_int: GRID_INT) -> int:
-    grid = [[Tile(type) for type in row] for row in grid_int]
-    pos: PAIR = (0, 1)
-    grid[pos[0]][pos[1]].max_distance = 1
-
-    routes = walk(grid, (0, 1), (len(grid) - 1, len(grid[-1]) - 2), condition=condition_without_slopes)
-    return len(max(routes, key=len)) - 1
-
-
-g_routes: list[list[PAIR]] = []
-
-
-def walk_crossings(
-    grid: GRID_INT, crossings: CROSSING_DICT, end_pos: PAIR, route: list[PAIR], level: int
-) -> list[PAIR]:
-    current = route[-1]
-    if current == end_pos:
-        return route
-
-    route_set = set(route)
-    crossing = crossings[current]
-
-    routes: list[list[PAIR]] = []
-
-    for outward, outward_set in zip(crossing.routes, crossing.routes_set):
-        if outward[-1] in crossings and not route_set.intersection(outward_set):
-            routes.append(walk_crossings(grid, crossings, end_pos, route + outward, level + 1))
-
-    if len(routes) == 1:
-        return routes[0]
-    if len(routes) == 0:
-        return []
-
-    if level < 10:
-        print(level, len(max(routes, key=len)))
-
-    return max(routes, key=len)
-
-
-def part_02_recursive(grid: GRID_INT) -> int:
-    crossings = get_crossings(grid)
-
-    start_route = get_route(grid, crossings, start_pos=(0, 1), start_direction=(1, 0))
-    print(start_route)
-    assert start_route[-1] in crossings
-
-    end_route = get_route(
-        grid, crossings, start_pos=(len(grid) - 1, len(grid[0]) - 2), start_direction=(-1, 0)
-    )
-    assert end_route[-1] in crossings
-    end_crossing_pos = end_route[-1]
-
-    longest = walk_crossings(grid, crossings, end_pos=end_crossing_pos, route=start_route, level=0)
-    print(start_route)
-    print(longest)
-    print(end_route)
-    return len(longest) + len(end_route)
-
-
 def part_02(grid: GRID_INT) -> int:
     crossings = get_crossings(grid)
 
     start_route = get_route(grid, crossings, start_pos=(0, 1), start_direction=(1, 0))
-    print(start_route)
     assert start_route[-1] in crossings
 
-    end_route = get_route(
-        grid, crossings, start_pos=(len(grid) - 1, len(grid[0]) - 2), start_direction=(-1, 0)
-    )
+    target_pos = (len(grid) - 1, len(grid[0]) - 2)
+    end_route = get_route(grid, crossings, start_pos=target_pos, start_direction=(-1, 0))
     assert end_route[-1] in crossings
-    end_crossing_pos = end_route[-1]
 
-    start_crossing = crossings[start_route[-1]]
-    end_crossing = crossings[end_crossing_pos]
+    graph = nx.Graph()
 
-    remaining_crossings = [
-        c for c in crossings.values() if c.pos != start_crossing.pos and c.pos != end_crossing.pos
-    ]
-    print(len(remaining_crossings))
+    for crossing in crossings.values():
+        source = crossing.pos
+        for route in crossing.routes:
+            target = route[-1]
+            if target not in crossings:
+                continue
 
-    return 999
+            graph.add_edge(source, target, weight=len(route))
+
+    graph.add_edge((0, 1), start_route[-1], weight=len(start_route))
+
+    graph.add_edge(target_pos, end_route[-1], weight=len(end_route))
+
+    weights: dict[tuple[PAIR, PAIR], int] = {}
+    for edge in graph.edges:
+        weight: int = graph.get_edge_data(edge[0], edge[1])["weight"]
+        weights[edge] = weight
+        weights[(edge[1], edge[0])] = weight
+
+    max_sum = 0
+
+    for edge_list in nx.all_simple_edge_paths(graph, source=(0, 1), target=target_pos):
+        current_sum = sum([weights[edge] for edge in edge_list])
+        if current_sum > max_sum:
+            max_sum = current_sum
+
+    return max_sum
 
 
 def main():
-    with open("aoc_23.txt") as infile:
+    with open("aoc_23.txt", "r") as infile:
         lines = [line.strip() for line in infile]
     grid = parse_lines(lines)
 
-    # print(part_01(grid))
-    print(part_02_recursive(grid))
+    print(part_01(grid))
+    print(part_02(grid))
 
 
 @pytest.fixture(name="grid")
@@ -484,7 +416,6 @@ def test_walk():
     grid[0][1].max_distance = 1
     routes = walk(grid, (0, 1), (4, 1), condition=condition_without_slopes)
 
-    # print(routes)
     assert len(max(routes, key=len)) == 9
 
 
@@ -503,22 +434,22 @@ def test_crossings():
         (1, 1): Crossing(
             pos=(1, 1),
             directions=[(-1, 0), (1, 0), (0, 1)],
-            routes=[[(0, 1)], [(2, 1), (3, 1)], [(1, 2), (1, 3)]],
+            routes=[[(2, 1), (3, 1)], [(1, 2), (1, 3)], [(0, 1)]],
         ),
         (1, 3): Crossing(
             pos=(1, 3),
             directions=[(1, 0), (0, -1), (0, 1)],
-            routes=[[(2, 3), (3, 3)], [(1, 2), (1, 1)], [(1, 4), (1, 5), (2, 5), (3, 5), (3, 4), (3, 3)]],
+            routes=[[(1, 4), (1, 5), (2, 5), (3, 5), (3, 4), (3, 3)], [(2, 3), (3, 3)], [(1, 2), (1, 1)]],
         ),
         (3, 1): Crossing(
             pos=(3, 1),
             directions=[(-1, 0), (1, 0), (0, 1)],
-            routes=[[(2, 1), (1, 1)], [(4, 1)], [(3, 2), (3, 3)]],
+            routes=[[(2, 1), (1, 1)], [(3, 2), (3, 3)], [(4, 1)]],
         ),
         (3, 3): Crossing(
             pos=(3, 3),
             directions=[(-1, 0), (0, -1), (0, 1)],
-            routes=[[(2, 3), (1, 3)], [(3, 2), (3, 1)], [(3, 4), (3, 5), (2, 5), (1, 5), (1, 4), (1, 3)]],
+            routes=[[(3, 4), (3, 5), (2, 5), (1, 5), (1, 4), (1, 3)], [(2, 3), (1, 3)], [(3, 2), (3, 1)]],
         ),
     }
 
