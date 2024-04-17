@@ -67,7 +67,7 @@ the file path), so they will know, which file caused the error.
 
 ### Parsing
 
-The data received in the previous step is now parsed into some abstract data
+The data received in the previous step is now loaded into some abstract data
 type. This should receive a pre-processed data, eg not raw data but some data
 consisting of python native types, such as list, dict, string, int, etc.
 
@@ -186,12 +186,13 @@ user, eg from this code:
 foo.bar
 ```
 
-The only acceptable exception should be `AttributeError` and nothing else. For
+The only acceptable exception should be `AttributeError`, `AssertionError` (this
+is for really exceptional "no way this will happen" cases) and nothing else. For
 example, if there's a file operation in the property (which could raise I/O
 error), then it should be converted to a method instead, or the exception should
 be handled properly.
 
-Also, handling the exception looks strange:
+Also, handling the exception would look strange:
 
 ```
 try:
@@ -275,6 +276,22 @@ def read_config(path: Path):
     # read the file, which can still raise exceptions but those are exceptional cases
 ```
 
+## Checking files, directories
+
+When TOCTOU is not feasible, we want to check for the existence of the path.
+
+Notable differences in python that it can check for a path existence
+(`path.exists()`)  and specifically for existence of a file (`path.is_file()`)
+or a directory (`path.is_dir()`) or for other special cases.
+
+If there's a change before open for a path, then it should be checking by
+`is_file`, similar if the code following expect the path to be directory it
+should be checked by `is_dir` (eg you want to get the contents of the directory).
+
+For such checks it is important that for the users we communicate it in a proper
+way, eg *no such file* or *no such directory* but not like *path does not exist*.
+
+
 ## Avoid nested ifs
 
 It is ok to check some value and then `return` or `break` or `continue`.
@@ -352,6 +369,43 @@ Context managers are also a must when some process-global state is modified (eg.
 current directory, environment variable) and their lifetime needs to be
 controlled (in other words: it needs to be restored to their previous value).
 
+## Atomic transactions
+
+If some persistent data is changed, it should be atomic. This can be done by
+rename or by making begin..commit in databases.
+
+## Building blocks, SRP
+
+[SRP](https://en.wikipedia.org/wiki/Single_responsibility_principle) says that
+everything should have a single responsibility. What I get from it is that the
+program should be built from building blocks which can work together.
+
+This means that classes or data structures should have their limited data stored
+in them and they should operate mostly on their data. This results a code where
+the instances of their classes can be re-used without any struggle.
+
+## Optional dependencies
+
+If a program optionally requires a package and can function without it, it can
+be handled by:
+
+```python
+try:
+    import foobar
+except ModuleNotFoundError:
+    foobar=None
+```
+
+Later the code can check `if foobar is not None` for the availability of the `foobar`.
+
+I find putting these code pieces depending on optional deps to a separate python
+module better so in that case the code can be separated.
+
+It it make sense, null object (or noop objects) can be defined in the case the
+optional dependency is missing, so the optional package availability will be
+opaque for the others.
+
+
 ## Program style and unification
 
 If an existing code needs to be changed, it should be done in a way as the
@@ -412,7 +466,7 @@ from foo.exc import Error
 
 try:
     foo.whatever()
-except foo.Error as err:
+except Error as err:
     ...
 ```
 
@@ -429,6 +483,8 @@ But as the code grows, it should use its own exceptions instead.
 Exceptions which must never ever be re-used:
 
 * `RuntimeError` is for python internals
+* `NameError` for variable name lookup errors
+* `SyntaxError` for python syntax errors
 
 *watch this space* :)
 
@@ -627,11 +683,13 @@ Where complex setup is needed, I usually prefer to write an `Environment` class
 where I collect all the resources the test needs and then yield this from a
 fixture.
 
-For mocking I prefer to use the `pytest-mocker` plugin.
+For mocking I prefer to use the `pytest-mock` plugin.
 
 Create coverage reports. 100% is not a target, and not the percentage which
 matters but the uncovered lines. Some IDEs have plugins which can show the
 results instantly, but a html can also be rendered from the coverage report.
+
+For variable comparison `dirty-equals` is a great library.
 
 # Usability, UX
 
@@ -667,15 +725,15 @@ Tracebacks should be avoided at all places where we know what the error was. CLI
 code should handle exceptions whenever possible, for example file I/O errors
 should be communicated without traceback.
 
-Tracebacks are reserverd for internal, unhandled, most serious errors where the
+Tracebacks are reserved for internal, unhandled, most serious errors where the
 error is most likely caused by a bug in the code.
 
 ### status
 
-If it makes sense, the CLI should have a `status` subcommand, which similar to
-`git` would show what is the current status. It should provide details about
-what is set up, probably from the configuration files, and also about what the
-user could possibly do next.
+If it makes sense (eg the program has some state), the CLI should have a
+`status` subcommand, which similar to `git` would show what is the current
+status. It should provide details about what is set up, probably from the
+configuration files, and also about what the user could possibly do next.
 
 ### Logging
 
