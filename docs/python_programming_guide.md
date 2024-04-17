@@ -284,8 +284,8 @@ Notable differences in python that it can check for a path existence
 (`path.exists()`)  and specifically for existence of a file (`path.is_file()`)
 or a directory (`path.is_dir()`) or for other special cases.
 
-If there's a change before open for a path, then it should be checking by
-`is_file`, similar if the code following expect the path to be directory it
+If there's a check before open for a path, then it should be checked by
+`is_file`. Similar, if the code following expect the path to be directory it
 should be checked by `is_dir` (eg you want to get the contents of the directory).
 
 For such checks it is important that for the users we communicate it in a proper
@@ -383,6 +383,29 @@ program should be built from building blocks which can work together.
 This means that classes or data structures should have their limited data stored
 in them and they should operate mostly on their data. This results a code where
 the instances of their classes can be re-used without any struggle.
+
+## Composition vs. inheritance
+
+If you follow SRP then to build complex things you have to compose objects. In
+python, in my experience this usually means passing the instances to the other
+object constructor and then constructing the desired functionality.
+
+```python
+SomeClass(Database(), Config())
+```
+
+So the `SomeClass` receive the `Database` and `Config` instances, so it can operate on
+them. The `SomeClass` has no code dealing with the database directly, it operates on
+the database via the object it received, and it is same for the config object.
+
+At the end, you can test all the 3 classes. Also you can test the `SomeClass` by
+providing a fake database and a fake config object to it (eg. to simulate various
+errors).
+
+You can also do this by inheritance. This also works in some other cases where
+you have to extend or override some method in a class to change the
+functionality.
+
 
 ## Optional dependencies
 
