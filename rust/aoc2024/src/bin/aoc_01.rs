@@ -113,7 +113,7 @@ mod tests {
 
     #[test]
     fn test_parse() {
-        let input_str = include_str!("../../aoc_01_sample.txt");
+        let input_str = include_str!("aoc_01_sample.txt");
         let input = input_str.to_string().parse::<Input>().unwrap();
         assert_eq!(
             input,
