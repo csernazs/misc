@@ -77,10 +77,10 @@ fn solve1(input: &Input) -> u32 {
     let mut right_sorted = input.right.clone();
     right_sorted.sort();
 
-    let zipped = left_sorted.iter().zip(right_sorted.iter());
+    let zipped = left_sorted.into_iter().zip(right_sorted.into_iter());
     let mut retval: u32 = 0;
     for (left, right) in zipped {
-        let diff = left.abs_diff(right.clone());
+        let diff = left.abs_diff(right);
         retval += diff;
     }
     retval
@@ -88,18 +88,12 @@ fn solve1(input: &Input) -> u32 {
 
 fn solve2(input: Input) -> u64 {
     let right_count = count(input.right.clone());
-    let mut retval: u64 = 0;
-    for item in input.left {
-        let tmp = right_count.get(&item).unwrap_or(&0);
-        retval += tmp * item as u64;
-    }
 
-    retval
-    // input
-    //     .left
-    //     .into_iter()
-    //     .map(|x| right_count.get(&x).unwrap_or(&0).to_owned())
-    //     .sum::<u64>()
+    input
+        .left
+        .into_iter()
+        .map(|x| x as u64 * *right_count.get(&x).unwrap_or(&0))
+        .sum()
 }
 
 fn main() {
