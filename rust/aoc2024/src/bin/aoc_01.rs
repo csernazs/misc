@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use std::hash::Hash;
 use std::{num::ParseIntError, str::FromStr};
 
-/// Simple CLI application with default values
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
