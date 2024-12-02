@@ -158,4 +158,12 @@ mod tests {
     fn test_solve2() {
         assert_eq!(solve2(&get_input()), 4);
     }
+
+    #[test]
+    fn test_solve2_case1() {
+        assert!(Report {
+            levels: vec![1, 4, 2, 3, 6]
+        }
+        .is_safe_2());
+    }
 }
