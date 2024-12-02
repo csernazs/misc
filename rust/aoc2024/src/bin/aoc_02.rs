@@ -16,13 +16,13 @@ struct Report {
 }
 
 impl Report {
-    fn is_safe_dec(self: &Self) -> bool {
+    fn is_safe_dec(&self) -> bool {
         let mut old: u32 = self.levels[0];
 
         for &current in &self.levels[1..] {
             let diff: i64 = old as i64 - current as i64;
 
-            if diff < 1 || diff > 3 {
+            if !(1..=3).contains(&diff) {
                 return false;
             }
             old = current;
@@ -30,13 +30,13 @@ impl Report {
         true
     }
 
-    fn is_safe_inc(self: &Self) -> bool {
+    fn is_safe_inc(&self) -> bool {
         let mut old: u32 = self.levels[0];
 
         for &current in &self.levels[1..] {
             let diff: i64 = current as i64 - old as i64;
             dbg!(diff);
-            if diff < 1 || diff > 3 {
+            if !(1..=3).contains(&diff) {
                 return false;
             }
             old = current;
@@ -44,11 +44,11 @@ impl Report {
         true
     }
 
-    fn is_safe_1(self: &Self) -> bool {
+    fn is_safe_1(&self) -> bool {
         self.is_safe_inc() || self.is_safe_dec()
     }
 
-    fn clone_with_removed_index(self: &Self, idx: usize) -> Report {
+    fn clone_with_removed_index(&self, idx: usize) -> Report {
         let mut new_levels = self.levels.clone();
         new_levels.remove(idx);
         Report { levels: new_levels }

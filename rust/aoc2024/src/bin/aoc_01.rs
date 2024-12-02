@@ -76,7 +76,7 @@ fn solve1(input: &Input) -> u32 {
     let mut right_sorted = input.right.clone();
     right_sorted.sort();
 
-    let zipped = left_sorted.into_iter().zip(right_sorted.into_iter());
+    let zipped = left_sorted.into_iter().zip(right_sorted);
     let mut retval: u32 = 0;
     for (left, right) in zipped {
         let diff = left.abs_diff(right);
