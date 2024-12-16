@@ -146,20 +146,18 @@ fn solve2(initial_map: &Map) -> usize {
     let result = walk(&mut initial_map_clone);
     assert!(result == LoopDetected::No, "Loop detected");
 
-    let walked_cells: Vec<[usize; 2]> = initial_map_clone
+    initial_map_clone
         .matrix
         .indexed_iter()
         .filter_map(|((row, col), &value)| match value {
             Cell::Walked if [row, col] != initial_map.position => Some([row, col]),
             _ => None,
         })
-        .collect();
-
-    walked_cells
+        .collect::<Vec<[usize; 2]>>()
         .par_iter()
-        .map(|&pos| {
+        .map(|pos| {
             let mut new_map = initial_map.clone();
-            new_map.matrix[pos] = Cell::Taken;
+            new_map.matrix[*pos] = Cell::Taken;
             match walk(&mut new_map) {
                 LoopDetected::Yes => 1,
                 LoopDetected::No => 0,
