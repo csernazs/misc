@@ -1,6 +1,5 @@
 use std::{
     collections::{HashMap, HashSet},
-    iter::repeat,
     str::FromStr,
 };
 
@@ -162,6 +161,12 @@ fn solve2(input: &Input) -> usize {
         }
     }
 
+    // for (_id, positions) in input.antennas.iter() {
+    //     let ttt = positions.iter().combinations(2).map(|combination| {
+    //         calculate_antinodes2(combination[0], combination[1], input.width, input.height)
+    //     });
+    // }
+
     retval.len() + input.positions.len()
 }
 
@@ -234,18 +239,3 @@ mod tests {
         assert_eq!(solve2(&input), 34);
     }
 }
-
-/*
-
-..........
-...#......
-..........
-....a.....
-..........
-.....a....
-..........
-......#...
-..........
-..........
-
-*/
