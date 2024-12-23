@@ -115,10 +115,11 @@ fn main() {
     println!("{}", solve2(&input));
 }
 
+#[cfg(test)]
 mod tests {
     use crate::{solve1, solve2, Input, Report};
 
-    fn get_input() -> Input {
+    fn get_sample_input() -> Input {
         Input {
             reports: vec![
                 Report {
@@ -146,17 +147,17 @@ mod tests {
     fn test_parse() {
         let input_str = include_str!("aoc_02_sample.txt");
         let input = input_str.to_string().parse::<Input>().unwrap();
-        assert_eq!(input, get_input());
+        assert_eq!(input, get_sample_input());
     }
 
     #[test]
     fn test_solve1() {
-        assert_eq!(solve1(&get_input()), 2);
+        assert_eq!(solve1(&get_sample_input()), 2);
     }
 
     #[test]
     fn test_solve2() {
-        assert_eq!(solve2(&get_input()), 4);
+        assert_eq!(solve2(&get_sample_input()), 4);
     }
 
     #[test]

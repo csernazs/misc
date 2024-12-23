@@ -43,14 +43,14 @@ impl Input {
     }
 
     fn sort_pages(&self, input_vec: &[i32]) -> Vec<i32> {
-        let mut foo: Vec<(i32, i32)> = input_vec
+        let mut tmp: Vec<(i32, i32)> = input_vec
             .iter()
             .map(|&x| (x, *self.ordering.get(&x).unwrap_or(&-1)))
             .collect();
 
-        foo.sort_by_key(|(_, right)| *right);
+        tmp.sort_by_key(|(_, right)| *right);
 
-        foo.iter().rev().map(|(left, _)| *left).collect()
+        tmp.iter().rev().map(|(left, _)| *left).collect()
     }
 }
 
