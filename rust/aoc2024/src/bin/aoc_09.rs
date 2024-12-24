@@ -7,7 +7,7 @@ use itertools::Itertools;
 #[command(author, version, about, long_about = None)]
 struct Cli {
     /// Input file path
-    #[arg(short, long, default_value = "aoc_07.txt")]
+    #[arg(short, long, default_value = "aoc_09.txt")]
     input: String,
 }
 

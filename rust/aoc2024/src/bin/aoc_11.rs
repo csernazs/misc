@@ -6,7 +6,7 @@ use std::{collections::HashMap, num::ParseIntError, str::FromStr, time::Instant}
 #[command(author, version, about, long_about = None)]
 struct Cli {
     /// Input file path
-    #[arg(short, long, default_value = "aoc_01.txt")]
+    #[arg(short, long, default_value = "aoc_11.txt")]
     input: String,
 }
 

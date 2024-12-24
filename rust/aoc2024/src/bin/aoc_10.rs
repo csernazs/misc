@@ -11,7 +11,7 @@ use ndarray::Array2;
 #[command(author, version, about, long_about = None)]
 struct Cli {
     /// Input file path
-    #[arg(short, long, default_value = "aoc_01.txt")]
+    #[arg(short, long, default_value = "aoc_10.txt")]
     input: String,
 }
 

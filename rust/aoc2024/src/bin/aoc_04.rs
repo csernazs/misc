@@ -5,7 +5,7 @@ use std::{collections::HashMap, str::FromStr};
 #[command(author, version, about, long_about = None)]
 struct Cli {
     /// Input file path
-    #[arg(short, long, default_value = "aoc_01.txt")]
+    #[arg(short, long, default_value = "aoc_04.txt")]
     input: String,
 }
 
